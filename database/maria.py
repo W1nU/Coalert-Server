@@ -1,7 +1,7 @@
 import pymysql
 from singleton import singleton
 from getpass import getpass
-
+import json
 
 class sql:
     @staticmethod
@@ -29,6 +29,18 @@ class sql:
                    LIKE '%{kwargs['name']}%'""",f"""SELECT bname FROM
                    company WHERE bname LIKE '%{kwargs['name']}%'"""]
 
+    @staticmethod
+    def sql_userInfo(kwargs):
+        return f"""SELECT name, email, type, birth, sex, access name FROM user
+                    WHERE id = '{kwargs['id']}'"""
+
+    @staticmethod
+    def sql_userSimpleReview(kwargs):
+        if 'id' in kwargs.keys():
+            return f"""SELECT * FROM simple_review WHERE id = '{kwargs['id']}'"""
+        elif 'cname' in kwargs.keys():
+            return f"""SELECT * FROM simple_review WHERE cname = '{kwargs['cname']}'"""
+
 class maria(sql, singleton):
     def __init__(self):
         user = input('Insert username : ')
@@ -42,14 +54,6 @@ class maria(sql, singleton):
                                   charset = 'utf8',
                                   unix_socket = '/Applications/mampstack-7.0.30-0/mysql/tmp/mysql.sock')
         self.cursor = self.connect.cursor()
-
-    @staticmethod
-    def search_parse(kwargs):
-        keys = kwargs.keys()
-        if 'cname' in keys:
-            return 0
-        elif 'company' in keys:
-            return 1
 
     def execute(self, sql):
         self.cursor.execute(sql)
@@ -88,9 +92,37 @@ class maria(sql, singleton):
         return info
 
     def title_search(self, **kwargs): #여기서는 post 매게변수 name으로 받아야 함
-        for i in super().sql_search(kwargs):
-            print(self.s_execute(i))
+        result = [[],[]]
+        sql_list = super().sql_search(kwargs)
+        info = [self.s_execute(sql_list[i]) for i in range(0,2)]
+        for i in range(0,2):
+            if info[i] == ():
+                continue
+            else:
+                for j in info[i]:
+                    if i == 0:
+                        result[0].append(j[0])
+                    else:
+                        result[1].append(j[0])
+        result = {'cname' : result[0], 'company' : result[1]}
+        return result
+
+    def get_user_info(self, **kwargs):
+        info = self.s_execute(super().sql_userInfo(kwargs))[0]
+        result = {'name' : info[0], 'email' : info[1], 'type' : info[2],
+                  'bitrh' : info[3], 'sex' : info[4], 'access' : info[5]}
+        return result
+
+    def get_user_simple_review(self, **kwargs):
+        result = []
+        info = self.s_execute(super().sql_userSimpleReview(kwargs))
+        for i in info:
+            result.append({'author' : i[1], 'cname' : i[2], 'content' : i[3], 'rate' : i[4]})
+        return result
+
+    def get_detailed_review(self, **kwargs):
+        pass
+
+
 
 db = maria.instance()
-
-db.title_search(name = '화')
