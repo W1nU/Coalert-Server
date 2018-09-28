@@ -27,7 +27,7 @@ class sql:
     def sql_search(kwargs):
         return [f"""SELECT cname FROM cinfo WHERE cname
                    LIKE '%{kwargs['name']}%'""",f"""SELECT bname FROM
-                   company WHERE bname LIKE '%{kwargs['name']}%'"""]
+                   company WHERE bname LIKE '%{kwargs['name']}%'"""] # 사람 검색 기능 추가해야함
 
     @staticmethod
     def sql_userInfo(kwargs):
@@ -40,6 +40,13 @@ class sql:
             return f"""SELECT * FROM simple_review WHERE id = '{kwargs['id']}'"""
         elif 'cname' in kwargs.keys():
             return f"""SELECT * FROM simple_review WHERE cname = '{kwargs['cname']}'"""
+
+    @staticmethod
+    def sql_userDetailedReview(kwargs):
+        if 'id' in kwargs.keys():
+            return f"""SELECT * FROM detailed_review WHERE id = '{kwargs['id']}'"""
+        elif 'cname' in kwargs.keys():
+            return f"""SELECT * FROM detailed_review WHERE cname = '{kwargs['cname']}'"""
 
 class maria(sql, singleton):
     def __init__(self):
@@ -121,8 +128,9 @@ class maria(sql, singleton):
         return result
 
     def get_detailed_review(self, **kwargs):
-        pass
-
+        result = []
+        info = self.s_execute(super().sql_userDetailedReview(kwargs))
+        print(info)
 
 
 db = maria.instance()
