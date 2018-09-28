@@ -2,14 +2,18 @@ import pymysql
 from singleton import singleton
 from getpass import getpass
 
-class __sql:
+class sql:
     @staticmethod
-    def __signIn(kwargs):
-        print( f'''INSERT INTO user (id, password, name, type, birth,
-                   sex, access) VALUES (kwargs[id], kwargs[password], kwargs[name],
-                   kwargs[type], kwargs[bitrh], kwargs[sex], kwargs[access])''')
+    def sql_signIn(kwargs):
+        return f"""INSERT INTO user (id, password, name, type, birth,
+                   sex, access) VALUES ('{kwargs['id']}', '{kwargs['password']}', '{kwargs['name']}',
+                   '{kwargs['type']}', '{kwargs['birth']}', '{kwargs['sex']}', '{kwargs['access']}')"""
 
-class maria(singleton, __sql):
+    @staticmethod
+    def sql_idcheck(kwargs):
+        return f"""SELECT EXISTS(SELECT id FROM user WHERE id = '{kwargs['id']}')"""
+
+class maria(sql, singleton):
     def __init__(self):
         user = input('Insert username : ')
         password = getpass('Insert password : ')
@@ -27,13 +31,18 @@ class maria(singleton, __sql):
         self.cursor.execute(sql)
         self.connect.commit()
 
+    def s_execute(self, sql):
+        self.cursor.execute(sql)
+        return self.cursor.fetchall()
+
     def signIn(self, **kwargs):
-        __signIn(kwargs)
-
-    def test(self):
-        print('hello')
-
-
+        self.execute(super().sql_signIn(kwargs))
+        return '1'
+        
+    def idCheck(self, **kwargs):
+        if self.s_execute(self.sql_idcheck(kwargs))[0][0] == 1:
+            return '0' #불가능
+        else:
+            return '1' #가능
 
 db = maria.instance()
-db.signIn({'id' : 'hello', 'password' : 'password', 'name' : 'name', 'type' : 1, 'birth' : '2018-01-01', 'sex' : 1, 'access' : 1})
