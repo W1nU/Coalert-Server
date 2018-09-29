@@ -1,6 +1,6 @@
 from enum import Enum
 
-class consts(Enum):
+class Consts(Enum):
     NAME = 'name' # 사용자 이름
     ID = 'id' # 사용자 아이디
     PASSWORD = 'password' # 사용자 패스워드
@@ -17,3 +17,6 @@ class consts(Enum):
     CONTENT = 'content' # 자세한 리뷰 내용
     CATEGORY = 'category' # 화장품 카테고리, 선블락 1, 아이쉐도우 2, 파운데이션 3, 립 4
     INGR = 'ingr' # 화장품 성분
+    SESSION = 'session' # 세션 키
+
+    POST = ['POST', 'GET'] #서버에서 사용하는 상수

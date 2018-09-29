@@ -1,4 +1,3 @@
-from database import maria
 import server
 
-db = maria.maria()
+server.start_test_server()
