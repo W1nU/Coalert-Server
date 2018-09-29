@@ -1,4 +1,4 @@
-class singleton(object):
+class Singleton:
     __instance = None
 
     @classmethod
