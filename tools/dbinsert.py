@@ -21,13 +21,15 @@ temp = []
 def company(ws):
     temp = []
     for i in ws.rows:
-        if i[1].value == '제품명':
+        if i[1].value == '제품명' or None:
             continue
         temp.append(i[2].value)
 
     company = list(set(temp))
 
     for i in company:
+        if i == None:
+            continue
         try:
             sql = f"""INSERT INTO company (bname) VALUE ('{i}')"""
             cursor.execute(sql)
@@ -39,10 +41,12 @@ def company(ws):
 def cinfo(ws):
     temp = []
     for i in ws.rows:
-        if i[1].value == '제품명':
+        if i[1].value == '제품명' or None:
             continue
         try:
-            sql = f"""INSERT INTO cinfo (cname, category, company) VALUES ('{i[1].value}', 4, '{i[2].value}')"""
+            cname_t = i[1].value + ' - ' + i[2].value
+            print(cname_t)
+            sql = f"""INSERT INTO cinfo (rank, cname, category, bname) VALUES ('{i[0].value}','{cname_t}', 4, '{i[2].value}')"""
             cursor.execute(sql)
             connect.commit()
 
@@ -52,12 +56,13 @@ def cinfo(ws):
 
 def cingr(ws):
     for i in ws.rows:
-        if i[1].value == '제품명':
+        if i[1].value == '제품명' or None:
             continue
         try:
             temp = str(i[3].value).split(',')
             for j in temp:
-                sql = f"""INSERT INTO cingr (cname , ingr) VALUES ('{i[1].value}','{j}')"""
+                cname_t = i[1].value + ' - ' + i[2].value
+                sql = f"""INSERT INTO cingr (cname, ingr) VALUES ('{cname_t}','{j}')"""
                 cursor.execute(sql)
                 connect.commit()
 
