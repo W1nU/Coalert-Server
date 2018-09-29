@@ -6,9 +6,8 @@ from surprise import Reader, Dataset, SVD, evaluate
 from sklearn.externals import joblib
 from konlpy.tag import Twitter
 
-
 def get_recommaned_cosmetic(userId, kind_cosmetic="eyeShadow", type=0, cosmetic="매트 아이 컬러"):
-    original_data = pd.read_csv('./eyeShadow.csv')
+    original_data = pd.read_csv('./recommendation/eyeShadow.csv')
     change_type = {'건성': 0, '지성': 1, '중성': 2, '복합성': 3, '민감성': 4}
     original_data['type'] = original_data['type'].map(change_type)
     id_purify_data = get_id_purify_data(original_data)
@@ -19,7 +18,7 @@ def get_recommaned_cosmetic(userId, kind_cosmetic="eyeShadow", type=0, cosmetic=
     sim_scores = list(enumerate(cosine_sim[int(cosmetic_id)]))
     sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
     sim_scores = sim_scores[1:26]
-    svd = joblib.load('eyeShadow.pkl')
+    svd = joblib.load('./recommendation/eyeShadow.pkl')
     cosmetic_id = [i[0] for i in sim_scores]
     prediction = making_predict_data(cosmetic_id, original_data)
     prediction['est'] = prediction['popId'].apply(lambda x: svd.predict(userId, x).est)

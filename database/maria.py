@@ -1,52 +1,59 @@
 import pymysql
-from singleton import singleton
+from .singleton import singleton
 from getpass import getpass
-import json
+from consts import consts
 
 class sql:
     @staticmethod
     def sql_signIn(kwargs):
         return f"""INSERT INTO user (id, password, name, email, type, birth,
-                   sex, access) VALUES ('{kwargs['id']}', '{kwargs['password']}', '{kwargs['name']}','{kwargs['email']}',
-                   '{kwargs['type']}', '{kwargs['birth']}', '{kwargs['sex']}', '{kwargs['access']}')"""
+                   sex, access) VALUES ('{kwargs[consts.ID.value]}', '{kwargs[consts.PASSWORD.value]}',
+                   '{kwargs[consts.NAME.value]}','{kwargs[consts.EMAIL.value]}','{kwargs[consts.TYPE.value]}',
+                   '{kwargs[consts.BIRTH.value]}', '{kwargs[consts.SEX.value]}', '{kwargs[consts.ACCESS.value]}')"""
 
     @staticmethod
     def sql_idcheck(kwargs):
-        return f"""SELECT EXISTS(SELECT id FROM user WHERE id = '{kwargs['id']}')"""
+        return f"""SELECT EXISTS(SELECT id FROM user WHERE id = '{kwargs[consts.ID.value]}')"""
 
     @staticmethod
     def sql_login(kwargs):
-        return f"""SELECT id, password FROM user WHERE id = '{kwargs['id']}'"""
+        return f"""SELECT id, password FROM user WHERE id = '{kwargs[consts.ID.value]}'"""
 
     @staticmethod
     def sql_cosmetic_search(kwargs):
         return f"""SELECT info.*, ingr.* FROM cinfo info, cingr ingr WHERE
-                   info.cname = '{kwargs['cname']}'"""
+                   info.cname = '{kwargs[consts.CNAME.value]}'"""
 
     @staticmethod
     def sql_search(kwargs):
         return [f"""SELECT cname FROM cinfo WHERE cname
-                   LIKE '%{kwargs['name']}%'""",f"""SELECT bname FROM
-                   company WHERE bname LIKE '%{kwargs['name']}%'"""] # 사람 검색 기능 추가해야함
+                   LIKE '%{kwargs[consts.CNAME.value]}%'""",f"""SELECT bname FROM
+                   company WHERE bname LIKE '%{kwargs[consts.CNAME.value]}%'"""] # 사람 검색 기능 추가해야함
 
     @staticmethod
-    def sql_userInfo(kwargs):
+    def sql_insertSimpleReview(kwargs):
+        return f"""INSERT INTO simple_review (id, cname, oneline, rate) VALUES
+                   ({kwargs[enumulate.ID.value]}, {kwargs[enumerate.CNAME.value]},
+                   {kwargs[enumulate.ONELINE.value], {kwargs[enumerate.RATE.value]}})"""
+
+    @staticmethod
+    def sql_getUserInfo(kwargs):
         return f"""SELECT name, email, type, birth, sex, access name FROM user
-                    WHERE id = '{kwargs['id']}'"""
+                    WHERE id = '{kwargs[consts.ID.value]}'"""
 
     @staticmethod
-    def sql_userSimpleReview(kwargs):
-        if 'id' in kwargs.keys():
-            return f"""SELECT * FROM simple_review WHERE id = '{kwargs['id']}'"""
-        elif 'cname' in kwargs.keys():
-            return f"""SELECT * FROM simple_review WHERE cname = '{kwargs['cname']}'"""
+    def sql_getUserSimpleReview(kwargs):
+        if consts.ID.value in kwargs.keys():
+            return f"""SELECT * FROM simple_review WHERE id = '{kwargs[consts.ID.value]}'"""
+        elif consts.CNAME.value in kwargs.keys():
+            return f"""SELECT * FROM simple_review WHERE cname = '{kwargs[consts.CNAME.value]}'"""
 
     @staticmethod
-    def sql_userDetailedReview(kwargs):
-        if 'id' in kwargs.keys():
-            return f"""SELECT * FROM detailed_review WHERE id = '{kwargs['id']}'"""
-        elif 'cname' in kwargs.keys():
-            return f"""SELECT * FROM detailed_review WHERE cname = '{kwargs['cname']}'"""
+    def sql_getUserDetailedReview(kwargs):
+        if consts.ID.value in kwargs.keys():
+            return f"""SELECT * FROM detailed_review WHERE id = '{kwargs[consts.ID.value]}'"""
+        elif consts.CNAME.value in kwargs.keys():
+            return f"""SELECT * FROM detailed_review WHERE cname = '{kwargs[consts.CNAME.value]}'"""
 
 class maria(sql, singleton):
     def __init__(self):
@@ -81,11 +88,11 @@ class maria(sql, singleton):
             return '1' #가능
 
     def login(self, **kwargs):
-        if self.idCheck(id = kwargs['id']) == '1':
+        if self.idCheck(id = kwargs[consts.ID.value]) == '1':
             return '2' # sql오류 아이디를 확인하세요
         user = self.s_execute(super().sql_login(kwargs))
 
-        if kwargs['password'] == user[0][1]:
+        if kwargs[consts.PASSWORD.value] == user[0][1]:
             return '1' #로그인 성공
         else:
             return '0' #로그인 실패
@@ -95,7 +102,7 @@ class maria(sql, singleton):
         ingr = []
         for i in info:
             ingr.append(i[4])
-        info = {'cname' : info[0][0], 'category' : info[0][1], 'company' : info[0][2], 'ingr' : ingr}
+        info = {consts.CNAME.value : info[0][0], consts.CATEGORY.value : info[0][1], consts.COMPANY.value : info[0][2], consts.INGR.value : ingr}
         return info
 
     def title_search(self, **kwargs): #여기서는 post 매게변수 name으로 받아야 함
@@ -111,26 +118,23 @@ class maria(sql, singleton):
                         result[0].append(j[0])
                     else:
                         result[1].append(j[0])
-        result = {'cname' : result[0], 'company' : result[1]}
+        result = {consts.CNAME.value : result[0], consts.COMPANY.value : result[1]}
         return result
 
     def get_user_info(self, **kwargs):
-        info = self.s_execute(super().sql_userInfo(kwargs))[0]
-        result = {'name' : info[0], 'email' : info[1], 'type' : info[2],
-                  'bitrh' : info[3], 'sex' : info[4], 'access' : info[5]}
+        info = self.s_execute(super().sql_getUserInfo(kwargs))[0]
+        result = {consts.NAME.value : info[0], consts.EMAIL.value : info[1], consts.TYPE.value : info[2],
+                  consts.BIRTH.value : info[3], consts.SEX.value : info[4], consts.ACCESS.value : info[5]}
         return result
 
     def get_user_simple_review(self, **kwargs):
         result = []
-        info = self.s_execute(super().sql_userSimpleReview(kwargs))
+        info = self.s_execute(super().sql_getUserSimpleReview(kwargs))
         for i in info:
-            result.append({'author' : i[1], 'cname' : i[2], 'content' : i[3], 'rate' : i[4]})
+            result.append({consts.ID.value : i[1], consts.CNAME.value : i[2], consts.CONTENT.value : i[3], consts.RATE.value : i[4]})
         return result
 
     def get_detailed_review(self, **kwargs):
         result = []
-        info = self.s_execute(super().sql_userDetailedReview(kwargs))
+        info = self.s_execute(super().sql_getUserDetailedReview(kwargs))
         print(info)
-
-
-db = maria.instance()
