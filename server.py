@@ -31,5 +31,8 @@ def login_session(id):
         sessiondb.drop_session(id)
     return sessiondb.create_session(id)
 
+def always_variable(info):
+    return info.form[Consts.ID.value], request.form[Consts.SESSION.value]
+
 def start_test_server():
     app.run(debug = True)
