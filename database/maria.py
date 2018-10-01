@@ -59,7 +59,7 @@ class Maria(sql, Singleton):
     def __init__(self):
         user = input('Insert username : ')
         password = getpass('Insert password : ')
-
+        
         self.connect = pymysql.connect(host = 'localhost',
                                        port = 3306,
                                        user = user,

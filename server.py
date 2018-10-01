@@ -2,6 +2,7 @@ from flask import Flask, request, redirect, jsonify
 from database.maria import Maria
 from database.sessiondb import Sessiondb
 from consts import Consts
+from logger import Logger
 import json
 
 app = Flask(__name__)
@@ -35,7 +36,7 @@ def signIn():
         return json.dumps({Consts.ID.value : request.form[Consts.ID.value]})
     except:
         return json.dumps({'error' : '현제 데이터베이스 서버에 접속이 불안정합니다\n잠시후 다시 시도해 주세요!'})
-        
+
 def login_session(id):
     if sessiondb.isExist_session(id) == 1:
         sessiondb.drop_session(id)
