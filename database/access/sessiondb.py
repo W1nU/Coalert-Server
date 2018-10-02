@@ -1,6 +1,6 @@
 from redis import Redis
 from uuid import uuid4
-from .singleton import Singleton
+from singleton import Singleton
 from time import time
 
 class Sessiondb(Singleton):

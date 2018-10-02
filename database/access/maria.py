@@ -1,5 +1,5 @@
 import pymysql
-from .singleton import Singleton
+from singleton import Singleton
 from getpass import getpass
 from consts import Consts
 
@@ -16,8 +16,8 @@ class sql:
         return f"""SELECT EXISTS(SELECT id FROM user WHERE id = '{kwargs[Consts.ID.value]}')"""
 
     @staticmethod
-    def sql_login(kwargs):
-        return f"""SELECT id, password FROM user WHERE id = '{kwargs[Consts.ID.value]}'"""
+    def sql_getPassword(kwargs):
+        return f"""SELECT password FROM user WHERE id = '{kwargs[Consts.ID.value]}'"""
 
     @staticmethod
     def sql_cosmetic_search(kwargs):
@@ -59,7 +59,7 @@ class Maria(sql, Singleton):
     def __init__(self):
         user = input('Insert username : ')
         password = getpass('Insert password : ')
-        
+
         self.connect = pymysql.connect(host = 'localhost',
                                        port = 3306,
                                        user = user,
@@ -77,25 +77,15 @@ class Maria(sql, Singleton):
         self.cursor.execute(sql)
         return self.cursor.fetchall()
 
+    def get_Password(self, kwargs):
+        return self.s_execute(super().sql_getPassword(kwargs))
+
     def signIn(self, **kwargs):
         self.execute(super().sql_signIn(kwargs))
         return '1'
 
     def idCheck(self, **kwargs):
-        if self.s_execute(self.sql_idcheck(kwargs))[0][0] == 1:
-            return '0' #불가능
-        else:
-            return '1' #가능
-
-    def login(self, **kwargs):
-        if self.idCheck(id = kwargs[Consts.ID.value]) == '1':
-            return '2' # sql오류 아이디를 확인하세요
-        user = self.s_execute(super().sql_login(kwargs))
-
-        if kwargs[Consts.PASSWORD.value] == user[0][1]:
-            return '1' #로그인 성공
-        else:
-            return '0' #로그인 실패
+        return self.s_execute(self.sql_idcheck(kwargs))[0][0] == 1
 
     def cosmetic_search(self, **kwargs):
         info = self.s_execute(super().sql_cosmetic_search(kwargs))

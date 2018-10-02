@@ -1,13 +1,11 @@
 from flask import Flask, request, redirect, jsonify
-from database.maria import Maria
-from database.sessiondb import Sessiondb
+from database.manager import dbManager
 from consts import Consts
-from logger import Logger
+from log.logger import Logger
 import json
 
 app = Flask(__name__)
-db = Maria.instance()
-sessiondb = Sessiondb.instance()
+db = dbManager.instance()
 
 @app.route('/test', methods = Consts.POST.value)
 def test():
@@ -18,14 +16,8 @@ def test():
 def login():
     id = request.form[Consts.ID.value]
     password = request.form[Consts.PASSWORD.value]
-    status = db.login(id = id, password = password)
-    if status == '1':
-        session_key = self.login_session(id)
-        return json.dumps({Consts.ID.value : id, Consts.SESSION.value : session_key}, ensure_ascii = False)
-    elif status == '2':
-        return json.dumps({'error' : '아이디를 확인하세요!'}, ensure_ascii = False)
-    else:
-        return json.dumps({'error' : '아이디와 비밀번호를 확인하세요!'}, ensure_ascii = False)
+    return json.dumps(db.login(id = id, password = password), ensure_ascii = False)
+    return json.dumps({'error' : '현제 데이터베이스 서버에 접속이 원할하지 않습니다.\n잠시후 다시 시도해 주세요!'}, ensure_ascii = False)
 
 @app.route('/signin', methods = Consts.POST.value)
 def signIn():
@@ -36,11 +28,6 @@ def signIn():
         return json.dumps({Consts.ID.value : request.form[Consts.ID.value]})
     except:
         return json.dumps({'error' : '현제 데이터베이스 서버에 접속이 불안정합니다\n잠시후 다시 시도해 주세요!'})
-
-def login_session(id):
-    if sessiondb.isExist_session(id) == 1:
-        sessiondb.drop_session(id)
-    return sessiondb.create_session(id)
 
 def always_variable(info):
     return info.form[Consts.ID.value], info.form[Consts.SESSION.value]
