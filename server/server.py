@@ -7,30 +7,36 @@ import json
 app = Flask(__name__)
 db = dbManager.instance()
 
-@app.route('/test', methods = Consts.POST.value)
-def test():
-    id = request.form[Consts.ID.value]
-    return sessiondb.open_session(id)
+@app.route('/idcheck', methods = ['POST', 'GET'])
+def idcheck():
+    if db.idCheck({'id' : request.form[Consts.ID.value]}) == '1':
+        return '1'
+    else:
+        return '0'
 
-@app.route('/login', methods = Consts.POST.value) # id, password
+@app.route('/login', methods = ['POST', 'GET']) # id, password
 def login():
-    id = request.form[Consts.ID.value]
-    password = request.form[Consts.PASSWORD.value]
-    return json.dumps(db.login(id = id, password = password), ensure_ascii = False)
-    return json.dumps({'error' : '현제 데이터베이스 서버에 접속이 원할하지 않습니다.\n잠시후 다시 시도해 주세요!'}, ensure_ascii = False)
+    try:
+        return json.dumps(db.login(id = request.form[Consts.ID.value], password = request.form[Consts.PASSWORD.value]), ensure_ascii = False)
+    except:
+        return json.dumps({'error' : Consts.DB_ERROR.value}, ensure_ascii = False)
 
-@app.route('/signin', methods = Consts.POST.value)
+@app.route('/signin', methods = ['POST', 'GET'])
 def signIn():
     try:
-        db.signIn(id = request.form[Consts.ID.value], password = request.form[Consts.PASSWORD.value], name = request.form[Consts.NAME.value],
-                  email = request.form[Consts.EMAIL.value], type = request.form[Consts.TYPE.value], birth = request.form[Consts.BIRTH.value],
-                  sex = request.form[Consts.SEX.value], access = request.form[Consts.ACCESS.value])
-        return json.dumps({Consts.ID.value : request.form[Consts.ID.value]})
+        return json.dumps(db.signIn(id = request.form[Consts.ID.value], password = request.form[Consts.PASSWORD.value], name = request.form[Consts.NAME.value],
+                          email = request.form[Consts.EMAIL.value], type = request.form[Consts.TYPE.value], birth = request.form[Consts.BIRTH.value],
+                          sex = request.form[Consts.SEX.value], access = request.form[Consts.ACCESS.value]), ensure_ascii = False)
     except:
-        return json.dumps({'error' : '현제 데이터베이스 서버에 접속이 불안정합니다\n잠시후 다시 시도해 주세요!'})
+        return json.dumps({'error' : Consts.DB_ERROR.value}, ensure_ascii = False)
 
-def always_variable(info):
-    return info.form[Consts.ID.value], info.form[Consts.SESSION.value]
+@app.route('/search_bar', methods = ['POST', 'GET'])
+def search_bar():
+    return json.dumps(db.search_bar(search = request.form[Consts.SEARCH.value], id = request.form[Consts.ID.value], session = request.form[Consts.SESSION.value]), ensure_ascii = False)
+
+@app.route('/cosmetic_info', methods = ['POST', 'GET'])
+def get_cosmetic_info():
+    return json.dumps(db.get_cosmetic_info(search = request.form[Consts.SEARCH.value], id = request.form[Consts.ID.value], session = request.form[Consts.SESSION.value]), ensure_ascii = False)
 
 def start_test_server():
     app.run(debug = True)

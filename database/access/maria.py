@@ -16,19 +16,24 @@ class sql:
         return f"""SELECT EXISTS(SELECT id FROM user WHERE id = '{kwargs[Consts.ID.value]}')"""
 
     @staticmethod
+    def sql_emailCheck(kwargs):
+        return f"""SELECT EXISTS(SELECT email FROM user WHERE email = '{kwargs[Consts.EMAIL.value]}')"""
+
+    @staticmethod
     def sql_getPassword(kwargs):
         return f"""SELECT password FROM user WHERE id = '{kwargs[Consts.ID.value]}'"""
 
     @staticmethod
-    def sql_cosmetic_search(kwargs):
+    def sql_get_cosmetic_info(kwargs):
         return f"""SELECT info.*, ingr.* FROM cinfo info, cingr ingr WHERE
-                   info.cname = '{kwargs[Consts.CNAME.value]}'"""
+                   info.cname = '{kwargs[Consts.SEARCH.value]}' AND ingr.cname = '{kwargs[Consts.SEARCH.value]}'"""
 
     @staticmethod
-    def sql_search(kwargs):
+    def sql_search_bar(kwargs):
         return [f"""SELECT cname FROM cinfo WHERE cname
-                   LIKE '%{kwargs[Consts.CNAME.value]}%'""",f"""SELECT bname FROM
-                   company WHERE bname LIKE '%{kwargs[Consts.CNAME.value]}%'"""] # 사람 검색 기능 추가해야함
+                   LIKE '%{kwargs[Consts.SEARCH.value]}%'""",f"""SELECT bname FROM
+                   company WHERE bname LIKE '%{kwargs[Consts.SEARCH.value]}%'""",
+                   f"""SELECT name FROM user WHERE name LIKE '%{kwargs[Consts.SEARCH.value]}%'"""]
 
     @staticmethod
     def sql_insertSimpleReview(kwargs):
@@ -77,54 +82,63 @@ class Maria(sql, Singleton):
         self.cursor.execute(sql)
         return self.cursor.fetchall()
 
-    def get_Password(self, kwargs):
+    def id_check(self, kwargs):
+        return self.s_execute(super().sql_idcheck(kwargs))
+
+    def email_check(self, kwargs):
+        return self.s_execute(super().sql_emailCheck(kwargs))
+
+    def get_password(self, kwargs):
         return self.s_execute(super().sql_getPassword(kwargs))
 
-    def signIn(self, **kwargs):
+    def sign_in(self, kwargs):
         self.execute(super().sql_signIn(kwargs))
         return '1'
 
-    def idCheck(self, **kwargs):
-        return self.s_execute(self.sql_idcheck(kwargs))[0][0] == 1
+    def get_cosmetic_info(self, kwargs):
+        info = self.s_execute(super().sql_get_cosmetic_info(kwargs))
+        if info == ():
+            return {'error' : 'cosmetic_name_error'}
+        else:
+            print(info)
+            ingr = []
+            for i in info:
+                ingr.append(i[5])
+            info = {Consts.CNAME.value : info[0][1], Consts.CATEGORY.value : info[0][2], Consts.RANK.value : info[0][0], Consts.COMPANY.value : info[0][3], Consts.INGR.value : ingr}
+            return info
 
-    def cosmetic_search(self, **kwargs):
-        info = self.s_execute(super().sql_cosmetic_search(kwargs))
-        ingr = []
-        for i in info:
-            ingr.append(i[4])
-        info = {Consts.CNAME.value : info[0][0], Consts.CATEGORY.value : info[0][1], Consts.COMPANY.value : info[0][2], Consts.INGR.value : ingr}
-        return info
-
-    def title_search(self, **kwargs): #여기서는 post 매게변수 name으로 받아야 함
-        result = [[],[]]
-        sql_list = super().sql_search(kwargs)
-        info = [self.s_execute(sql_list[i]) for i in range(0,2)]
-        for i in range(0,2):
+    def search_bar(self, kwargs): #여기서는 post 매게변수 search으로 받아야 함
+        result = [[],[],[]]
+        sql_list = super().sql_search_bar(kwargs)
+        info = [self.s_execute(sql_list[i]) for i in range(len(sql_list))]
+        for i in range(0,3):
             if info[i] == ():
                 continue
             else:
                 for j in info[i]:
                     if i == 0:
                         result[0].append(j[0])
-                    else:
+                    elif i == 1:
                         result[1].append(j[0])
-        result = {Consts.CNAME.value : result[0], Consts.COMPANY.value : result[1]}
+                    else:
+                        result[2].append(j[0])
+        result = {Consts.CNAME.value : result[0], Consts.COMPANY.value : result[1], Consts.NAME.value : result[2]}
         return result
 
-    def get_user_info(self, **kwargs):
+    def get_user_info(self, kwargs):
         info = self.s_execute(super().sql_getUserInfo(kwargs))[0]
         result = {Consts.NAME.value : info[0], Consts.EMAIL.value : info[1], Consts.TYPE.value : info[2],
                   Consts.BIRTH.value : info[3], Consts.SEX.value : info[4], Consts.ACCESS.value : info[5]}
         return result
 
-    def get_user_simple_review(self, **kwargs):
+    def get_user_simple_review(self, kwargs):
         result = []
         info = self.s_execute(super().sql_getUserSimpleReview(kwargs))
         for i in info:
             result.append({Consts.ID.value : i[1], Consts.CNAME.value : i[2], Consts.CONTENT.value : i[3], Consts.RATE.value : i[4]})
         return result
 
-    def get_detailed_review(self, **kwargs):
+    def get_detailed_review(self, kwargs):
         result = []
         info = self.s_execute(super().sql_getUserDetailedReview(kwargs))
         print(info)
