@@ -46,5 +46,10 @@ def get_simple_review():
     data = request.form.to_dict()
     return json.dumps(db.get_simple_review(data), ensure_ascii = False)
 
+@app.route('/get_user', methods = ['POST', 'GET'])
+def get_user_info():
+    data = request.form.to_dict()
+    return json.dumps(db.get_user_info(data), ensure_ascii = False)
+
 def start_test_server():
-    app.run(debug = True)
+    app.run('0.0.0.0',debug = True)

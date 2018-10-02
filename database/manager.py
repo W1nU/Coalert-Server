@@ -28,10 +28,9 @@ class dbManager(Singleton):
         else:
             return '0'
 
-    def session_check(self, kwargs):
-        print(kwargs[Consts.SESSION.value], self.redis.open_session(kwargs[Consts.ID.value]))
-        if kwargs[Consts.SESSION.value] == self.redis.open_session(kwargs[Consts.ID.value]):
-            return '1'
+    def session_check(self, func, *args):
+        if args[0][Consts.SESSION.value] == self.redis.open_session(args[0][Consts.ID.value]):
+            return func(args[0])
         else:
             return '0'
 
@@ -55,19 +54,25 @@ class dbManager(Singleton):
             return {Consts.ID.value : kwargs[Consts.ID.value]}
 
     def search_bar(self, kwargs):
-        if self.session_check(kwargs) == '1':
-            return self.maria.search_bar(kwargs)
-        else:
+        try:
+            return self.session_check(self.maria.search_bar, kwargs)
+        except:
             return {'error' : 're-login'}
 
     def get_simple_review(self, kwargs):
-        if self.session_check(kwargs) == '1':
-            return self.maria.get_simple_review(kwargs)
-        else:
+        try:
+            return self.session_check(self.maria.get_simple_review, kwargs)
+        except:
             return {'error' : 're-login'}
 
     def get_cosmetic_info(self, kwargs):
-        if self.session_check(kwargs) == '1':
-            return self.maria.get_cosmetic_info(kwargs)
-        else:
+        try:
+            return self.session_check(self.maria.get_cosmetic_info, kwargs)
+        except:
+            return {'error' : 're-login'}
+
+    def get_user_info(self, kwargs):
+        try:
+            return self.session_check(self.maria.get_user_info, kwargs)
+        except:
             return {'error' : 're-login'}

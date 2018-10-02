@@ -100,7 +100,6 @@ class Maria(sql, Singleton):
         if info == ():
             return {'error' : 'cosmetic_name_error'}
         else:
-            print(info)
             ingr = []
             for i in info:
                 ingr.append(i[5])
@@ -128,7 +127,7 @@ class Maria(sql, Singleton):
     def get_user_info(self, kwargs):
         info = self.s_execute(super().sql_getUserInfo(kwargs))[0]
         result = {Consts.NAME.value : info[0], Consts.EMAIL.value : info[1], Consts.TYPE.value : info[2],
-                  Consts.BIRTH.value : info[3], Consts.SEX.value : info[4], Consts.ACCESS.value : info[5]}
+                  Consts.BIRTH.value : info[3].strftime('%Y-%m-%d'), Consts.SEX.value : info[4], Consts.ACCESS.value : info[5]}
         return result
 
     def get_simple_review(self, kwargs):
@@ -141,4 +140,4 @@ class Maria(sql, Singleton):
     def get_detailed_review(self, kwargs):
         result = []
         info = self.s_execute(super().sql_getUserDetailedReview(kwargs))
-        print(info)
+        return info
