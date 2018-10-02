@@ -10,16 +10,17 @@ class dbManager(Singleton):
         self.mongo = Mongo.instance()
         self.redis = Redisdb.instance()
 
-    def id_check(self, kwargs):
-        if self.maria.id_check(kwargs)[0][0] == 0:
-            return '1'
-        else:
-            return '0'
-
     def id_block(self, kwargs):
         #This block works for prevention id duplicated insert,
         #In signIn, it will block id 5mins after idCheck method called
         self.redis.id_block(kwargs[Consts.ID.value])
+
+    def id_check(self, kwargs):
+        if self.maria.id_check(kwargs)[0][0] == 0 and self.Redisdb.open_session(kwargs[Consts.ID.value]) != '0':
+            self.Redisdb.id_block(kwargs[Consts.ID.value])
+            return '1'
+        else:
+            return '0'
 
     def email_check(self, kwargs):
         if self.maria.email_check(kwargs)[0][0] == 0:
@@ -34,7 +35,7 @@ class dbManager(Singleton):
         else:
             return '0'
 
-    def login(self, **kwargs):
+    def login(self, kwargs):
         password = self.maria.get_password(kwargs)
         if password == ():
             return {'error' : '존재하지 않는 아이디입니다!'}
@@ -44,23 +45,28 @@ class dbManager(Singleton):
         else:
             return {'error' : '아이디와 비밀번호를 확인하세요!'}
 
-    def sign_in(self, **kwargs):
+    def sign_in(self, kwargs):
         if self.id_check(kwargs) == '0' or self.Redisdb.open_session(kwargs[Consts.ID.value]) != '0':
             return {'error' : '이미 존재하는 ID입니다!'}
         elif self.email_check(kwargs) == '0':
             return {'error' : '이미 존재하는 Email입니다!'}
         else:
-            self.Redisdb.id_block(kwargs[Consts.ID.value])
             self.maria.signIn(kwargs)
             return {Consts.ID.value : kwargs[Consts.ID.value]}
 
-    def search_bar(self, **kwargs):
+    def search_bar(self, kwargs):
         if self.session_check(kwargs) == '1':
             return self.maria.search_bar(kwargs)
         else:
             return {'error' : 're-login'}
 
-    def get_cosmetic_info(self, **kwargs):
+    def get_simple_review(self, kwargs):
+        if self.session_check(kwargs) == '1':
+            return self.maria.get_simple_review(kwargs)
+        else:
+            return {'error' : 're-login'}
+
+    def get_cosmetic_info(self, kwargs):
         if self.session_check(kwargs) == '1':
             return self.maria.get_cosmetic_info(kwargs)
         else:

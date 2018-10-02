@@ -47,11 +47,11 @@ class sql:
                     WHERE id = '{kwargs[Consts.ID.value]}'"""
 
     @staticmethod
-    def sql_getUserSimpleReview(kwargs):
+    def sql_getSimpleReview(kwargs):
         if Consts.ID.value in kwargs.keys():
-            return f"""SELECT * FROM simple_review WHERE id = '{kwargs[Consts.ID.value]}'"""
+            return f"""SELECT * FROM simple_review WHERE id = '{kwargs[Consts.ID.value]}' LIMIT {kwargs[Consts.START.value]}, {kwargs[Consts.COUNT.value]}"""
         elif Consts.CNAME.value in kwargs.keys():
-            return f"""SELECT * FROM simple_review WHERE cname = '{kwargs[Consts.CNAME.value]}'"""
+            return f"""SELECT * FROM simple_review WHERE cname = '{kwargs[Consts.CNAME.value]}' LIMIT {kwargs[Consts.START.value]}, {kwargs[Consts.COUNT.value]}"""
 
     @staticmethod
     def sql_getUserDetailedReview(kwargs):
@@ -131,11 +131,11 @@ class Maria(sql, Singleton):
                   Consts.BIRTH.value : info[3], Consts.SEX.value : info[4], Consts.ACCESS.value : info[5]}
         return result
 
-    def get_user_simple_review(self, kwargs):
+    def get_simple_review(self, kwargs):
         result = []
-        info = self.s_execute(super().sql_getUserSimpleReview(kwargs))
+        info = self.s_execute(super().sql_getSimpleReview(kwargs))
         for i in info:
-            result.append({Consts.ID.value : i[1], Consts.CNAME.value : i[2], Consts.CONTENT.value : i[3], Consts.RATE.value : i[4]})
+            result.append({Consts.ID.value : i[1], Consts.CNAME.value : i[2], Consts.ONELINE.value : i[3], Consts.RATE.value : i[4]})
         return result
 
     def get_detailed_review(self, kwargs):

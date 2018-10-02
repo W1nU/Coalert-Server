@@ -20,5 +20,8 @@ class Consts(Enum):
     SESSION = 'session' # 세션 키
     SEARCH = 'search' # 검색시 요청 상수
     RANK = 'rank'
+    START = 'start' # 검색시 시작 인덱스
+    COUNT = 'count' # 검색시 몇개 가져올 것인지 결정
+
     DB_ERROR = '현재 데이터베이스 서버 접속이 원할하지 않습니다\n잠시후 시도해 주세요!'
     POST = ['POST', 'GET'] #서버에서 사용하는 상수
