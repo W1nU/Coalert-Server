@@ -32,7 +32,7 @@ class dbManager(Singleton):
         if args[0][Consts.SESSION.value] == self.redis.open_session(args[0][Consts.ID.value]):
             return func(args[0])
         else:
-            return '0'
+            return {'error' : 're-login'}
 
     def login(self, kwargs):
         password = self.maria.get_password(kwargs)
@@ -56,23 +56,35 @@ class dbManager(Singleton):
     def search_bar(self, kwargs):
         try:
             return self.session_check(self.maria.search_bar, kwargs)
-        except:
-            return {'error' : 're-login'}
+        except Exception as e:
+            return {'error' : f'Parameter Key error : {e}'}
 
     def get_simple_review(self, kwargs):
         try:
             return self.session_check(self.maria.get_simple_review, kwargs)
-        except:
-            return {'error' : 're-login'}
+        except Exception as e:
+            return {'error' : f'Parameter Key error : {e}'}
+
+    def get_detailed_review(self, kwargs):
+        try:
+            return self.session_check(self.maria.get_detailed_review, kwargs)
+        except Exception as e:
+            return {'error' : f'Parameter Key error : {e}'}
 
     def get_cosmetic_info(self, kwargs):
         try:
             return self.session_check(self.maria.get_cosmetic_info, kwargs)
-        except:
-            return {'error' : 're-login'}
+        except Exception as e:
+            return {'error' : f'Parameter Key error : {e}'}
 
     def get_user_info(self, kwargs):
         try:
             return self.session_check(self.maria.get_user_info, kwargs)
-        except:
-            return {'error' : 're-login'}
+        except Exception as e:
+            return {'error' : f'Parameter Key error : {e}'}
+
+    def get_follow_info(self, kwargs):
+        try:
+            return self.session_check(self.maria.get_follow_info, kwargs)
+        except Exception as e:
+            return {'error' : f'Parameter Key error : {e}'}

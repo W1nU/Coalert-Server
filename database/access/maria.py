@@ -24,12 +24,12 @@ class sql:
         return f"""SELECT password FROM user WHERE id = '{kwargs[Consts.ID.value]}'"""
 
     @staticmethod
-    def sql_get_cosmetic_info(kwargs):
+    def sql_getCosmeticInfo(kwargs):
         return f"""SELECT info.*, ingr.* FROM cinfo info, cingr ingr WHERE
                    info.cname = '{kwargs[Consts.SEARCH.value]}' AND ingr.cname = '{kwargs[Consts.SEARCH.value]}'"""
 
     @staticmethod
-    def sql_search_bar(kwargs):
+    def sql_searchBar(kwargs):
         return [f"""SELECT cname FROM cinfo WHERE cname
                    LIKE '%{kwargs[Consts.SEARCH.value]}%'""",f"""SELECT bname FROM
                    company WHERE bname LIKE '%{kwargs[Consts.SEARCH.value]}%'""",
@@ -48,17 +48,21 @@ class sql:
 
     @staticmethod
     def sql_getSimpleReview(kwargs):
-        if Consts.ID.value in kwargs.keys():
-            return f"""SELECT * FROM simple_review WHERE id = '{kwargs[Consts.ID.value]}' LIMIT {kwargs[Consts.START.value]}, {kwargs[Consts.COUNT.value]}"""
-        elif Consts.CNAME.value in kwargs.keys():
-            return f"""SELECT * FROM simple_review WHERE cname = '{kwargs[Consts.CNAME.value]}' LIMIT {kwargs[Consts.START.value]}, {kwargs[Consts.COUNT.value]}"""
+        if Consts.CNAME.value in kwargs.keys():
+            return f"""SELECT * FROM simple_review WHERE cname = '{kwargs[Consts.ID.value]}' LIMIT {kwargs[Consts.START.value]}, {kwargs[Consts.COUNT.value]}"""
+        elif Consts.ID.value in kwargs.keys():
+            return f"""SELECT * FROM simple_review WHERE id = '{kwargs[Consts.CNAME.value]}' LIMIT {kwargs[Consts.START.value]}, {kwargs[Consts.COUNT.value]}"""
 
     @staticmethod
-    def sql_getUserDetailedReview(kwargs):
-        if Consts.ID.value in kwargs.keys():
-            return f"""SELECT * FROM detailed_review WHERE id = '{kwargs[Consts.ID.value]}'"""
-        elif Consts.CNAME.value in kwargs.keys():
-            return f"""SELECT * FROM detailed_review WHERE cname = '{kwargs[Consts.CNAME.value]}'"""
+    def sql_getDetailedReview(kwargs):
+        if Consts.CNAME.value in kwargs.keys():
+            return f"""SELECT * FROM detailed_review WHERE cname = '{kwargs[Consts.ID.value]}' LIMIT {kwargs[Consts.START.value]}, {kwargs[Consts.COUNT.value]}"""
+        elif Consts.ID.value in kwargs.keys():
+            return f"""SELECT * FROM detailed_review WHERE id = '{kwargs[Consts.CNAME.value]}'LIMIT {kwargs[Consts.START.value]}, {kwargs[Consts.COUNT.value]}"""
+
+    @staticmethod
+    def sql_getFollowInfo(kwargs):
+        return f"""SELECT * FROM follow_list WHERE id = '{kwargs[Consts.SEARCH.value]}' OR fid = '{kwargs[Consts.SEARCH.value]}'"""
 
 class Maria(sql, Singleton):
     def __init__(self):
@@ -96,9 +100,9 @@ class Maria(sql, Singleton):
         return '1'
 
     def get_cosmetic_info(self, kwargs):
-        info = self.s_execute(super().sql_get_cosmetic_info(kwargs))
+        info = self.s_execute(super().sql_getCosmeticInfo(kwargs))
         if info == ():
-            return {'error' : 'cosmetic_name_error'}
+            return {'error' : 'No results, Check your parameter value'}
         else:
             ingr = []
             for i in info:
@@ -108,7 +112,7 @@ class Maria(sql, Singleton):
 
     def search_bar(self, kwargs): #여기서는 post 매게변수 search으로 받아야 함
         result = [[],[],[]]
-        sql_list = super().sql_search_bar(kwargs)
+        sql_list = super().sql_searchBar(kwargs)
         info = [self.s_execute(sql_list[i]) for i in range(len(sql_list))]
         for i in range(0,3):
             if info[i] == ():
@@ -126,6 +130,8 @@ class Maria(sql, Singleton):
 
     def get_user_info(self, kwargs):
         info = self.s_execute(super().sql_getUserInfo(kwargs))[0]
+        if info == ():
+            return {'error' : 'No results, Check your parameter value'}
         result = {Consts.NAME.value : info[0], Consts.EMAIL.value : info[1], Consts.TYPE.value : info[2],
                   Consts.BIRTH.value : info[3].strftime('%Y-%m-%d'), Consts.SEX.value : info[4], Consts.ACCESS.value : info[5]}
         return result
@@ -133,11 +139,21 @@ class Maria(sql, Singleton):
     def get_simple_review(self, kwargs):
         result = []
         info = self.s_execute(super().sql_getSimpleReview(kwargs))
+        if info == ():
+            return {'error' : 'No results, Check your parameter value'}
         for i in info:
             result.append({Consts.ID.value : i[1], Consts.CNAME.value : i[2], Consts.ONELINE.value : i[3], Consts.RATE.value : i[4]})
         return result
 
     def get_detailed_review(self, kwargs):
         result = []
-        info = self.s_execute(super().sql_getUserDetailedReview(kwargs))
+        info = self.s_execute(super().sql_getDetailedReview(kwargs))
+        if info == ():
+            return {'error' : 'No results, Check your parameter value'}
         return info
+
+    def get_follow_info(self, kwargs):
+        info = self.s_execute(super().sql_getFollowInfo(kwargs))
+        if info == ():
+            return {'error' : 'No results, Check your parameter value'}
+        return {i[0]+1 : i[1] for i in enumerate(info)}

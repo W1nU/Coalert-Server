@@ -34,22 +34,50 @@ def signIn():
 @app.route('/search_bar', methods = ['POST', 'GET'])
 def search_bar():
     data = request.form.to_dict()
-    return json.dumps(db.search_bar(data), ensure_ascii = False)
+    try:
+        return json.dumps(db.search_bar(data), ensure_ascii = False)
+    except:
+        return json.dumps({'error' : Consts.DB_ERROR.value})
 
 @app.route('/cosmetic_info', methods = ['POST', 'GET'])
 def get_cosmetic_info():
     data = request.form.to_dict()
-    return json.dumps(db.get_cosmetic_info(data), ensure_ascii = False)
+    try:
+        return json.dumps(db.get_cosmetic_info(data), ensure_ascii = False)
+    except:
+        return json.dumps({'error' : Consts.DB_ERROR.value}, ensure_ascii = False)
 
 @app.route('/get_simple', methods = ['POST', 'GET'])
 def get_simple_review():
     data = request.form.to_dict()
-    return json.dumps(db.get_simple_review(data), ensure_ascii = False)
+    try:
+        return json.dumps(db.get_simple_review(data), ensure_ascii = False)
+    except:
+        return json.dumps({'error' : Consts.DB_ERROR.value}, ensure_ascii = False)
+
+@app.route('/get_detailed', methods = ['POST', 'GET'])
+def get_detailed_review():
+    data = request.form.to_dict()
+    try:
+        return json.dumps(db.get_detailed_review(data), ensure_ascii = False)
+    except:
+        return json.dumps({'error' : Consts.DB_ERROR.value}, ensure_ascii = False)
 
 @app.route('/get_user', methods = ['POST', 'GET'])
 def get_user_info():
     data = request.form.to_dict()
-    return json.dumps(db.get_user_info(data), ensure_ascii = False)
+    try:
+        return json.dumps(db.get_user_info(data), ensure_ascii = False)
+    except:
+        return json.dumps({'error' : Consts.DB_ERROR.value}, ensure_ascii = False)
+
+@app.route('/get_follow', methods = ['POST', 'GET'])
+def get_follow_info():
+    data = request.form.to_dict()
+    try:
+        return json.dumps(db.get_follow_info(data), ensure_ascii = False)
+    except:
+        return json.dumps({'error' : Consts.DB_ERROR.value}, ensure_ascii = False)
 
 def start_test_server():
     app.run('0.0.0.0',debug = True)
