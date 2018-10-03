@@ -20,7 +20,8 @@ def login():
     data = request.form.to_dict()
     try:
         return json.dumps(db.login(data), ensure_ascii = False)
-    except:
+    except Exception as e:
+        print(e)
         return json.dumps({'error' : Consts.DB_ERROR.value}, ensure_ascii = False)
 
 @app.route('/signin', methods = ['POST', 'GET'])
@@ -76,6 +77,15 @@ def get_follow_info():
     data = request.form.to_dict()
     try:
         return json.dumps(db.get_follow_info(data), ensure_ascii = False)
+    except:
+        return json.dumps({'error' : Consts.DB_ERROR.value}, ensure_ascii = False)
+
+@app.route('/put_detailed')
+def put_detailed_review():
+    data = request.form.to_dict()
+    try:
+        db.put_detailed_review(data)
+        return json.dumps({'done' : 'works fine!'})
     except:
         return json.dumps({'error' : Consts.DB_ERROR.value}, ensure_ascii = False)
 

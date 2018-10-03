@@ -88,3 +88,15 @@ class dbManager(Singleton):
             return self.session_check(self.maria.get_follow_info, kwargs)
         except Exception as e:
             return {'error' : f'Parameter Key error : {e}'}
+
+    def put_detailed_review(self, kwargs):
+        try:
+            return self.session_check(self.maria.put_detailed_review, kwargs)
+        except Exception as e:
+            return {'error' : f'Parameter Key error : {e}'}
+
+    def put_simple_review(self, kwargs):
+        try:
+            return self.session_check(self.maria.put_simple_review, kwargs)
+        except Exception as e:
+            return {'error' : f'Parameter Key erroe : {e}'}

@@ -44,25 +44,34 @@ class sql:
     @staticmethod
     def sql_getUserInfo(kwargs):
         return f"""SELECT name, email, type, birth, sex, access name FROM user
-                    WHERE id = '{kwargs[Consts.ID.value]}'"""
+                    WHERE id = '{kwargs[Consts.SEARCH.value]}'"""
 
     @staticmethod
     def sql_getSimpleReview(kwargs):
         if Consts.CNAME.value in kwargs.keys():
-            return f"""SELECT * FROM simple_review WHERE cname = '{kwargs[Consts.ID.value]}' LIMIT {kwargs[Consts.START.value]}, {kwargs[Consts.COUNT.value]}"""
+            return f"""SELECT * FROM simple_review WHERE cname = '{kwargs[Consts.CNAME.value]}' LIMIT {kwargs[Consts.START.value]}, {kwargs[Consts.COUNT.value]}"""
         elif Consts.ID.value in kwargs.keys():
-            return f"""SELECT * FROM simple_review WHERE id = '{kwargs[Consts.CNAME.value]}' LIMIT {kwargs[Consts.START.value]}, {kwargs[Consts.COUNT.value]}"""
+            return f"""SELECT * FROM simple_review WHERE id = '{kwargs[Consts.SEARCH.value]}' LIMIT {kwargs[Consts.START.value]}, {kwargs[Consts.COUNT.value]}"""
 
     @staticmethod
     def sql_getDetailedReview(kwargs):
         if Consts.CNAME.value in kwargs.keys():
-            return f"""SELECT * FROM detailed_review WHERE cname = '{kwargs[Consts.ID.value]}' LIMIT {kwargs[Consts.START.value]}, {kwargs[Consts.COUNT.value]}"""
+            return f"""SELECT * FROM detailed_review WHERE cname = '{kwargs[Consts.CNAME.value]}' LIMIT {kwargs[Consts.START.value]}, {kwargs[Consts.COUNT.value]}"""
         elif Consts.ID.value in kwargs.keys():
-            return f"""SELECT * FROM detailed_review WHERE id = '{kwargs[Consts.CNAME.value]}'LIMIT {kwargs[Consts.START.value]}, {kwargs[Consts.COUNT.value]}"""
+            return f"""SELECT * FROM detailed_review WHERE id = '{kwargs[Consts.SEARCH.value]}'LIMIT {kwargs[Consts.START.value]}, {kwargs[Consts.COUNT.value]}"""
 
     @staticmethod
     def sql_getFollowInfo(kwargs):
         return f"""SELECT * FROM follow_list WHERE id = '{kwargs[Consts.SEARCH.value]}' OR fid = '{kwargs[Consts.SEARCH.value]}'"""
+
+    @staticmethod
+    def sql_putDetailedReview(kwargs):
+        return f"""INSERT INTO detailed_review (id, cname, title, contents) VALUES ({kwargs[Consts.ID.value]}, {kwargs[Consts.CNAME.value]}, {kwargs[Consts.TITLE,value]})
+                   {kwargs[Consts.CONTENT.value]})"""
+
+    @staticmethod
+    def sql_putSimpleReview(kwargs):
+        return f"""INSERT INTO simple_review (id, cname, oneline, rate) VALUES ({kwargs[Consts.ID.value]}, {kwargs[Consts.CNAME.value]}, {kwargs[Consts.ONELINE.value]}, {kwargs[Consts.RATE.value]})"""
 
 class Maria(sql, Singleton):
     def __init__(self):
@@ -150,10 +159,18 @@ class Maria(sql, Singleton):
         info = self.s_execute(super().sql_getDetailedReview(kwargs))
         if info == ():
             return {'error' : 'No results, Check your parameter value'}
-        return info
+        for i in info:
+            result.append({Consts.LCODE.value : i[0], Consts.ID.value : i[1], Consts.CNAME.value : i[2], Consts.TITLE.value : i[3], Consts.CONTENT.value : i[4], Consts.LIKE.value : i[5]})
+        return result
 
     def get_follow_info(self, kwargs):
         info = self.s_execute(super().sql_getFollowInfo(kwargs))
         if info == ():
             return {'error' : 'No results, Check your parameter value'}
         return {i[0]+1 : i[1] for i in enumerate(info)}
+
+    def put_detailed_review(self, kwargs):
+        self.execute(super().sql_putDetailedReview(kwargs))
+
+    def put_simple_review(self, kwargs):
+        self.execute(super().sql_putSimpleReview(kwargs))
