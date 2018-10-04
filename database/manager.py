@@ -89,6 +89,12 @@ class dbManager(Singleton):
         except Exception as e:
             return {'error' : f'Parameter Key error : {e}'}
 
+    def get_lcode(self, kwargs):
+        try:
+            return self.maria.get_lcode()
+        except Exception as e:
+            return {'error' : f'Parameter Key error : {e}'}
+
     def put_detailed_review(self, kwargs):
         try:
             return self.session_check(self.maria.put_detailed_review, kwargs)

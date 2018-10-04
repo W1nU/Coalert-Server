@@ -73,6 +73,10 @@ class sql:
     def sql_putSimpleReview(kwargs):
         return f"""INSERT INTO simple_review (id, cname, oneline, rate) VALUES ({kwargs[Consts.ID.value]}, {kwargs[Consts.CNAME.value]}, {kwargs[Consts.ONELINE.value]}, {kwargs[Consts.RATE.value]})"""
 
+    @staticmethod
+    def sql_getLastId():
+        return """SELECT LAST_INSERT_ID()"""
+
 class Maria(sql, Singleton):
     def __init__(self):
         user = input('Insert username : ')
@@ -169,6 +173,9 @@ class Maria(sql, Singleton):
             return {'error' : 'No results, Check your parameter value'}
         return {i[0]+1 : i[1] for i in enumerate(info)}
 
+    def get_lcode(self):
+        return self.s_execute(super().sql_getLastId())
+        
     def put_detailed_review(self, kwargs):
         self.execute(super().sql_putDetailedReview(kwargs))
 

@@ -11,9 +11,9 @@ db = dbManager.instance()
 def idcheck():
     data = request.form.to_dict()
     if db.id_check(data) == '1':
-        return '1'
+        return {'result' : 1}
     else:
-        return '0'
+        return {'result' : 0}
 
 @app.route('/login', methods = ['POST', 'GET']) # id, password
 def login():
@@ -21,7 +21,6 @@ def login():
     try:
         return json.dumps(db.login(data), ensure_ascii = False)
     except Exception as e:
-        print(e)
         return json.dumps({'error' : Consts.DB_ERROR.value}, ensure_ascii = False)
 
 @app.route('/signin', methods = ['POST', 'GET'])
@@ -85,7 +84,16 @@ def put_detailed_review():
     data = request.form.to_dict()
     try:
         db.put_detailed_review(data)
-        return json.dumps({'done' : 'works fine!'})
+        return json.dumps({'lcode' : db.get_lcode()})
+    except:
+        return json.dumps({'error' : Consts.DB_ERROR.value}, ensure_ascii = False)
+
+@app.route('/put_simple')
+def put_simple_review():
+    data = request.form.to_dict()
+    try:
+        db.put_simple_review(data)
+        return json.dumps({'lcode' : db.get_lcode()})
     except:
         return json.dumps({'error' : Consts.DB_ERROR.value}, ensure_ascii = False)
 
