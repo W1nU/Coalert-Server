@@ -83,18 +83,20 @@ def get_follow_info():
 def put_detailed_review():
     data = request.form.to_dict()
     try:
-        db.put_detailed_review(data)
+        if db.put_simple_review(data) == '0':
+            return json.dumps({'error' : 'Duplicated entry'})
         return json.dumps({'lcode' : db.get_lcode()})
-    except:
+    except Exception as e:
         return json.dumps({'error' : Consts.DB_ERROR.value}, ensure_ascii = False)
 
-@app.route('/put_simple')
+@app.route('/put_simple', methods = ['POST','GET'])
 def put_simple_review():
     data = request.form.to_dict()
     try:
-        db.put_simple_review(data)
+        if db.put_simple_review(data) == '0':
+            return json.dumps({'error' : 'Duplicated entry'})
         return json.dumps({'lcode' : db.get_lcode()})
-    except:
+    except Exception as e:
         return json.dumps({'error' : Consts.DB_ERROR.value}, ensure_ascii = False)
 
 def start_test_server():

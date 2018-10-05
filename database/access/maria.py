@@ -36,12 +36,6 @@ class sql:
                    f"""SELECT name FROM user WHERE name LIKE '%{kwargs[Consts.SEARCH.value]}%'"""]
 
     @staticmethod
-    def sql_insertSimpleReview(kwargs):
-        return f"""INSERT INTO simple_review (id, cname, oneline, rate) VALUES
-                   ({kwargs[enumulate.ID.value]}, {kwargs[enumerate.CNAME.value]},
-                   {kwargs[enumulate.ONELINE.value], {kwargs[enumerate.RATE.value]}})"""
-
-    @staticmethod
     def sql_getUserInfo(kwargs):
         return f"""SELECT name, email, type, birth, sex, access name FROM user
                     WHERE id = '{kwargs[Consts.SEARCH.value]}'"""
@@ -66,12 +60,12 @@ class sql:
 
     @staticmethod
     def sql_putDetailedReview(kwargs):
-        return f"""INSERT INTO detailed_review (id, cname, title, contents) VALUES ({kwargs[Consts.ID.value]}, {kwargs[Consts.CNAME.value]}, {kwargs[Consts.TITLE,value]})
+        return f"""INSERT INTO detailed_review (id, cname, title, contents) VALUES ('{kwargs[Consts.ID.value]}', '{kwargs[Consts.CNAME.value]}', '{kwargs[Consts.TITLE,value]}')
                    {kwargs[Consts.CONTENT.value]})"""
 
     @staticmethod
     def sql_putSimpleReview(kwargs):
-        return f"""INSERT INTO simple_review (id, cname, oneline, rate) VALUES ({kwargs[Consts.ID.value]}, {kwargs[Consts.CNAME.value]}, {kwargs[Consts.ONELINE.value]}, {kwargs[Consts.RATE.value]})"""
+        return f"""INSERT INTO simple_review (id, cname, oneline, rate) VALUES ('{kwargs[Consts.ID.value]}', '{kwargs[Consts.CNAME.value]}', '{kwargs[Consts.ONELINE.value]}', '{kwargs[Consts.RATE.value]}')"""
 
     @staticmethod
     def sql_getLastId():
@@ -153,7 +147,7 @@ class Maria(sql, Singleton):
         result = []
         info = self.s_execute(super().sql_getSimpleReview(kwargs))
         if info == ():
-            return {'error' : 'No results, Check your parameter value'}
+            return {'error' : 'No results'}
         for i in info:
             result.append({Consts.ID.value : i[1], Consts.CNAME.value : i[2], Consts.ONELINE.value : i[3], Consts.RATE.value : i[4]})
         return result
@@ -162,7 +156,7 @@ class Maria(sql, Singleton):
         result = []
         info = self.s_execute(super().sql_getDetailedReview(kwargs))
         if info == ():
-            return {'error' : 'No results, Check your parameter value'}
+            return {'error' : 'No results'}
         for i in info:
             result.append({Consts.LCODE.value : i[0], Consts.ID.value : i[1], Consts.CNAME.value : i[2], Consts.TITLE.value : i[3], Consts.CONTENT.value : i[4], Consts.LIKE.value : i[5]})
         return result
@@ -174,8 +168,11 @@ class Maria(sql, Singleton):
         return {i[0]+1 : i[1] for i in enumerate(info)}
 
     def get_lcode(self):
-        return self.s_execute(super().sql_getLastId())
-        
+        result =  self.s_execute(super().sql_getLastId())
+        if result == ():
+            return {'error' : 'No result, db_error'}
+        return result[0][0]
+
     def put_detailed_review(self, kwargs):
         self.execute(super().sql_putDetailedReview(kwargs))
 
