@@ -17,15 +17,17 @@ def idcheck():
 
 @app.route('/login', methods = ['POST', 'GET']) # id, password
 def login():
-    data = request.form.to_dict()
+    data = request.args.to_dict()
     try:
+        print(json.dumps(db.login(data), ensure_ascii = False))
         return json.dumps(db.login(data), ensure_ascii = False)
     except Exception as e:
+        print(e)
         return json.dumps({'error' : Consts.DB_ERROR.value}, ensure_ascii = False)
 
 @app.route('/signin', methods = ['POST', 'GET'])
 def signIn():
-    data = request.form.to_dict()
+    data = request.args.to_dict()
     try:
         return json.dumps(db.signIn(data), ensure_ascii = False)
     except:
@@ -33,8 +35,10 @@ def signIn():
 
 @app.route('/search_bar', methods = ['POST', 'GET'])
 def search_bar():
-    data = request.form.to_dict()
+    data = request.args.to_dict()
+    print(data)
     try:
+        print(db.search_bar(data))
         return json.dumps(db.search_bar(data), ensure_ascii = False)
     except:
         return json.dumps({'error' : Consts.DB_ERROR.value})
@@ -98,6 +102,20 @@ def put_simple_review():
         return json.dumps({'lcode' : db.get_lcode()})
     except Exception as e:
         return json.dumps({'error' : Consts.DB_ERROR.value}, ensure_ascii = False)
+
+@app.route('/put_like', methods = ['POST', 'GET'])
+def put_like():
+    data = request.form.to_dict()
+    try:
+        if db.put_like(data) == '0':
+            return json.dumps({'error' : 'Duplicated entry'})
+        return json.dumps({'result' : '1'})
+    except:
+        return json.dumps({'error' : Consts.DB_ERROR.value}, ensure_ascii = False)
+
+@app.route('/main')
+def hello():
+    return '김영우 바보'
 
 def start_test_server():
     app.run('0.0.0.0',debug = True)

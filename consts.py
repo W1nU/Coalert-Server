@@ -25,6 +25,7 @@ class Consts(Enum):
     LCODE = 'lcode' # 게시글 번호
     TITLE = 'title' # 게시글 제목
     LIKE = 'like' # 좋아요 갯수
+    USER = 'user' # 유저 정보
     
     DB_ERROR = '현재 데이터베이스 서버 접속이 원할하지 않습니다\n잠시후 시도해 주세요!'
     POST = ['POST', 'GET'] #서버에서 사용하는 상수

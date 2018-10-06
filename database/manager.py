@@ -39,8 +39,11 @@ class dbManager(Singleton):
         if password == ():
             return {'error' : '존재하지 않는 아이디입니다!'}
         elif password[0][0] == kwargs[Consts.PASSWORD.value]:
+            user_info = self.maria.get_user_info({Consts.SEARCH.value : kwargs[Consts.ID.value]})
             session_key = self.redis.create_session(kwargs[Consts.ID.value])
-            return {Consts.ID.value : kwargs[Consts.ID.value], Consts.SESSION.value : session_key}
+            print(user_info)
+            user_info[Consts.SESSION.value] = session_key
+            return user_info
         else:
             return {'error' : '아이디와 비밀번호를 확인하세요!'}
 
@@ -100,8 +103,15 @@ class dbManager(Singleton):
             return self.session_check(self.maria.put_detailed_review, kwargs)
         except:
             return '0'
+
     def put_simple_review(self, kwargs):
         try:
             return self.session_check(self.maria.put_simple_review, kwargs)
+        except:
+            return '0'
+
+    def put_like(self, kwargs):
+        try:
+            return self.session_check(self.maria.put_like, kwargs)
         except:
             return '0'

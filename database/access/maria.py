@@ -37,7 +37,7 @@ class sql:
 
     @staticmethod
     def sql_getUserInfo(kwargs):
-        return f"""SELECT name, email, type, birth, sex, access name FROM user
+        return f"""SELECT id, name, email, type, birth, sex, access name FROM user
                     WHERE id = '{kwargs[Consts.SEARCH.value]}'"""
 
     @staticmethod
@@ -68,30 +68,41 @@ class sql:
         return f"""INSERT INTO simple_review (id, cname, oneline, rate) VALUES ('{kwargs[Consts.ID.value]}', '{kwargs[Consts.CNAME.value]}', '{kwargs[Consts.ONELINE.value]}', '{kwargs[Consts.RATE.value]}')"""
 
     @staticmethod
+    def sql_putLike(kwargs):
+        return f"""INSERT INTO detailed_like (id, lcode) VALUES ('{kwargs[Consts.ID.value]}', '{kwargs[Consts.LCODE.value]}')"""
+
+    @staticmethod
     def sql_getLastId():
         return """SELECT LAST_INSERT_ID()"""
 
 class Maria(sql, Singleton):
     def __init__(self):
-        user = input('Insert username : ')
-        password = getpass('Insert password : ')
-
-        self.connect = pymysql.connect(host = 'localhost',
-                                       port = 3306,
-                                       user = user,
-                                       password = password,
-                                       db = 'coalert',
-                                       charset = 'utf8',
-                                       unix_socket = '/Applications/mampstack-7.0.30-0/mysql/tmp/mysql.sock')
-        self.cursor = self.connect.cursor()
+        self.user = input('Insert username : ')
+        self.password = getpass('Insert password : ')
 
     def execute(self, sql):
-        self.cursor.execute(sql)
-        self.connect.commit()
+        connect = pymysql.connect(host = 'localhost',
+                                  port = 3306,
+                                  user = user,
+                                  password = password,
+                                  db = 'coalert',
+                                  charset = 'utf8',
+                                  unix_socket = '/Applications/mampstack-7.0.30-0/mysql/tmp/mysql.sock')
+        cursor = connect.cursor()
+        cursor.excute(sql)
+        connect.commit()
 
     def s_execute(self, sql):
-        self.cursor.execute(sql)
-        return self.cursor.fetchall()
+        connect = pymysql.connect(host = 'localhost',
+                                  port = 3306,
+                                  user = self.user,
+                                  password = self.password,
+                                  db = 'coalert',
+                                  charset = 'utf8',
+                                  unix_socket = '/Applications/mampstack-7.0.30-0/mysql/tmp/mysql.sock')
+        cursor = connect.cursor()
+        cursor.execute(sql)
+        return cursor.fetchall()
 
     def id_check(self, kwargs):
         return self.s_execute(super().sql_idcheck(kwargs))
@@ -139,8 +150,8 @@ class Maria(sql, Singleton):
         info = self.s_execute(super().sql_getUserInfo(kwargs))[0]
         if info == ():
             return {'error' : 'No results, Check your parameter value'}
-        result = {Consts.NAME.value : info[0], Consts.EMAIL.value : info[1], Consts.TYPE.value : info[2],
-                  Consts.BIRTH.value : info[3].strftime('%Y-%m-%d'), Consts.SEX.value : info[4], Consts.ACCESS.value : info[5]}
+        result = {Consts.ID.value : info [0], Consts.NAME.value : info[1], Consts.EMAIL.value : info[2], Consts.TYPE.value : info[3],
+                  Consts.BIRTH.value : info[4].strftime('%Y-%m-%d'), Consts.SEX.value : info[5], Consts.ACCESS.value : info[6]}
         return result
 
     def get_simple_review(self, kwargs):
@@ -178,3 +189,6 @@ class Maria(sql, Singleton):
 
     def put_simple_review(self, kwargs):
         self.execute(super().sql_putSimpleReview(kwargs))
+
+    def put_like(self, kwargs):
+        self.execute(super().sql_putLike(kwargs))
