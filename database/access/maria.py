@@ -75,6 +75,7 @@ class sql:
     def sql_getLastId():
         return """SELECT LAST_INSERT_ID()"""
 
+
 class Maria(sql, Singleton):
     def __init__(self):
         self.user = input('Insert username : ')

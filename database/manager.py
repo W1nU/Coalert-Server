@@ -12,7 +12,7 @@ class dbManager(Singleton):
 
     def id_block(self, kwargs):
         #This block works for prevention id duplicated insert,
-        #In signIn, it will block id 5mins after idCheck method called
+        #In signIn, it will block id for 5mins after idCheck method called
         self.redis.id_block(kwargs[Consts.ID.value])
 
     def id_check(self, kwargs):

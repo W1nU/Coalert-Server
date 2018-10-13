@@ -8,7 +8,7 @@ from konlpy.tag import Twitter
 
 
 def get_recommaned_cosmetic(userId, kind_cosmetic, type=0):
-    original_data = pd.read_csv('RecommendSystem//data/' + kind_cosmetic + '.csv')
+    original_data = pd.read_csv('./data/' + kind_cosmetic + '.csv')
     change_type = {'건성': 0, '지성': 1, '중성': 2, '복합성': 3, '민감성': 4}
     original_data['type'] = original_data['type'].map(change_type)
     id_purify_data = get_id_purify_data(original_data)
@@ -22,12 +22,12 @@ def get_recommaned_cosmetic(userId, kind_cosmetic, type=0):
     sim_scores = list(enumerate(cosine_sim[int(cosmetic_id)]))
     sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
     sim_scores = sim_scores[1:26]
-    svd = joblib.load('RecommendSystem/model/' + kind_cosmetic + '/' + kind_cosmetic + '_' + str(type) + '.pkl')
+    svd = joblib.load('./model/' + kind_cosmetic + '/' + kind_cosmetic + '_' + str(type) + '.pkl')
     cosmetic_id = [i[0] for i in sim_scores]
     prediction = making_predict_data(cosmetic_id, original_data)
     prediction['est'] = prediction['popId'].apply(lambda x: svd.predict(userId, x).est)
     prediction = prediction.sort_values('est', ascending=False)
-    return prediction.head(10)
+    return prediction.head(100)
 
 
 def get_best_cosmetic(original_data, type):
@@ -57,6 +57,7 @@ def get_id_purify_data(id_purify_data):
         2: get_member_per_type(id_purify_data, 2),
         3: get_member_per_type(id_purify_data, 3),
         4: get_member_per_type(id_purify_data, 4)}
+
     for i in range(5):
         np.random.seed(42)
         id_purify_data.loc[id_purify_data["type"] == i, "userId"] = [np.random.randint(i * 200, 200 * (i + 1))
@@ -110,3 +111,5 @@ def making_predict_data(cosmetic_id, original_data):
     predict_data = original_data[['popId', 'name']]
     predict_data = predict_data.drop_duplicates()
     return predict_data.iloc[cosmetic_id]
+
+print(get_recommaned_cosmetic(102,'libTint'))
